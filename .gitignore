@@ -1,0 +1,3 @@
+# Ignore ESP-IDF build output
+/build/
+sdkconfig.old
