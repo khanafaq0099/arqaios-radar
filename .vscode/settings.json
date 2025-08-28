@@ -3,6 +3,7 @@
         "*.c": "c",
         "B.C": "cpp",
         "string.h": "c",
-        "tlv_parser.h": "c"
+        "tlv_parser.h": "c",
+        "compare": "c"
     }
 }
