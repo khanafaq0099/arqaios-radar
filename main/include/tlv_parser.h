@@ -80,7 +80,7 @@ typedef struct
     float minZ;
 } heightTlv;
 
-typedef struct
+typedef struct __attribute__((packed))
 {
     mmwHeader header;
     pointObj points[MAX_POINTS];

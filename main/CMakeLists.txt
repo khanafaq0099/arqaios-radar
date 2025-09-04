@@ -1,3 +1,3 @@
-idf_component_register(SRCS "uart_test.c" "tlv_parser.c"
+idf_component_register(SRCS "uart.c" "tlv_parser.c" "main.c"
                     INCLUDE_DIRS "." "include"
-                    REQUIRES wifi_manager mqtt_client driver)
+                    REQUIRES wifi_manager mqtt_client driver mqtt)

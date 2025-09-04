@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <esp_log.h>
 #include "tlv_parser.h"
+#include "freertos/FreeRTOS.h"
+#include "mqtt.h"
 
 const uint8_t MAGIC_WORD[8] = {0x02, 0x01, 0x04, 0x03, 0x06, 0x05, 0x08, 0x07};
 
@@ -46,8 +48,9 @@ void parse_header(const uint8_t *buffer, mmwHeader *header)
 
 }
 
-void parse_tlv(const uint8_t *buffer, int numTLVs, int offset, int total_len, radarFrame_t *frame) // offset =  0 , total_len = tlv_len (total_pkt_len - HDR)
+void parse_tlv(const uint8_t *buffer, int numTLVs, int offset, int total_len, radarFrame_t *frame) 
 {
+    // offset =  0 , total_len = tlv_len (total_pkt_len - HDR)
     printf("PARSER: Parsing %d TLVs with offset %d and total length %d\n", numTLVs, offset, total_len);  
 
     for (int i = 0; i < numTLVs; i++)
@@ -113,8 +116,10 @@ void parse_tlv(const uint8_t *buffer, int numTLVs, int offset, int total_len, ra
                 frame->points[p].range     = parse_int16_le(&pt_data[4]);
                 frame->points[p].snr       = parse_int16_le(&pt_data[6]);
 
-            printf("[INFO] Parsed %d compressed points from TLV 1020\n", numPoints);
-
+                printf("[INFO] Parsed %d compressed points from TLV 1020\n", numPoints);
+                if ((p % 20) == 0) 
+                    vTaskDelay(pdMS_TO_TICKS(1));
+                 
             }
             break;
         }
@@ -175,6 +180,8 @@ void parse_tlv(const uint8_t *buffer, int numTLVs, int offset, int total_len, ra
             break;
         }
         offset += length;
+        vTaskDelay(pdMS_TO_TICKS(1));
+
     }
     
     if (frame->numPoints > 0)
@@ -205,6 +212,8 @@ void parse_tlv(const uint8_t *buffer, int numTLVs, int offset, int total_len, ra
                    frame->objects[i].confidenceLevel);
         }
     }
+    //Call mqtt operation.
+    Publish((char *)frame, MQTT_TOPIC);
 }
 
 bool find_magic_word(const uint8_t *buffer, int length, int*pos)
@@ -214,7 +223,6 @@ bool find_magic_word(const uint8_t *buffer, int length, int*pos)
         if (memcmp(&buffer[i], MAGIC_WORD, 8) == 0){
             *pos = i;
             return true;
-
         }
     }
     return false;

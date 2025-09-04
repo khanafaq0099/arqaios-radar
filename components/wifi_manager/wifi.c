@@ -8,12 +8,22 @@
 #include "nvs_flash.h"
 #include "esp_mac.h"
 #include "esp_log.h"
+#include "string.h"
+#include "mqtt.h"
 
+#define WIFI_CONNECTED_BIT BIT0
+#define WIFI_FAIL_BIT BIT1
+// AP CONFIG
 #define ESP_WIFI_SSIDAP      "ESP32"
 #define ESP_WIFI_PASSAP      "12345678"
 #define MAX_STA_CONN        4
+// STA CONFIG
+#define ESP_WIFI_SSID       "afaq"
+#define ESP_WIFI_PASS       "asdf@1234"
 
 static const char *TAG = "wifi_manager";
+
+int connected = 0;
 
 /* FreeRTOS event group to signal when we are connected properly */
 static EventGroupHandle_t wifi_event_group;
@@ -26,21 +36,64 @@ event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *ev
         switch (event_id)
         {
         case WIFI_EVENT_AP_STACONNECTED:
-            //once connected start mqtt 
-            /* code */
             break;
         case WIFI_EVENT_AP_STADISCONNECTED:
-            /* code */
             break;
         case WIFI_EVENT_AP_START:
             break;
         case WIFI_EVENT_AP_STOP:
             break;
-       
+        case WIFI_EVENT_STA_START:
+            esp_wifi_connect();
+            ESP_LOGI(TAG, "Station started");
+            break;
+        case WIFI_EVENT_STA_DISCONNECTED:
+            ESP_LOGI(TAG, "Station Disconnected Retrying SSID:%s , PSWD:%s", ESP_WIFI_SSID, ESP_WIFI_PASS);
+            esp_wifi_connect();
+            break;
+        case WIFI_EVENT_STA_CONNECTED:
+            ESP_LOGI(TAG, "Station Connected");
+            break;
         default:
             break;
         }
     }
+    else if (event_base == IP_EVENT)
+    {
+        ip_event_got_ip_t* event = (ip_event_got_ip_t*)event_data;
+        switch (event_id)
+        {
+        case IP_EVENT_STA_GOT_IP:
+                ESP_LOGI(TAG, "Got IP:" IPSTR, IP2STR(&event->ip_info.ip));
+                connected = 1;
+                    xEventGroupSetBits(wifi_event_group, WIFI_CONNECTED_BIT);
+
+            
+            break;
+        default:
+            break;
+        }
+    }
+    
+}
+void Wifi_STA(void)
+{
+    wifi_config_t wifi_config_sta = {
+        .sta =
+            {
+                .threshold.authmode = WIFI_AUTH_WPA2_PSK,
+                .pmf_cfg            = {.capable = true, .required = false},
+            },
+    };
+
+    sprintf((char *)wifi_config_sta.sta.ssid, "%s", ESP_WIFI_SSID);
+    sprintf((char *)wifi_config_sta.sta.password, "%s", ESP_WIFI_PASS);
+    ESP_LOGI(TAG, "SSID =%s &&&& Pass=%s\n", ESP_WIFI_SSID, ESP_WIFI_PASS);
+        ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
+
+    ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config_sta));
+
+    ESP_LOGI(TAG, "wifi_init_sta finished.");
 }
 
 void Wifi_AP(void)
@@ -84,12 +137,17 @@ void Initialize_Wifi() {
     ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM));
 
     esp_netif_create_default_wifi_ap();
+    esp_netif_create_default_wifi_sta();
 
-    Wifi_AP();
+    Wifi_STA();
 
     ESP_ERROR_CHECK(esp_wifi_start());
     ESP_LOGI(TAG, "wifi_init_finished.");
 
+    EventBits_t bits = xEventGroupWaitBits(wifi_event_group, WIFI_CONNECTED_BIT | 
+                                       WIFI_FAIL_BIT, pdFALSE, pdFALSE, portMAX_DELAY);
+    if (bits & WIFI_CONNECTED_BIT)
+        Init_Mqtt();
 }
 
 void Wifi_Init()
