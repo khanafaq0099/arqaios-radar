@@ -127,9 +127,9 @@ void uart_init()
 
 void parser_init(){
     // xTaskCreate(parser_task, "parser_task", 4096*3, NULL, 9, NULL);
-    // xTaskCreatePinnedToCore(parser_task, "parser_task", 4096*3, NULL, 9, NULL, 1);
+    xTaskCreatePinnedToCore(parser_task, "parser_task", 4096*3, NULL, 9, NULL, 1);
 }
  
 void uart_read_init(){
-    // xTaskCreate(uart_reader_task, "uart_reader_task", 4096*4, NULL, 10, NULL);
+    xTaskCreate(uart_reader_task, "uart_reader_task", 4096*4, NULL, 10, NULL);
 }
