@@ -104,7 +104,7 @@ int16_t parse_int16_le(const uint8_t *data);
 
 void parse_header(const uint8_t *buffer, mmwHeader *header);
 
-void parse_tlv(const uint8_t *buffer, int numTLVs, int offset, int total_len, radarFrame_t *frame);
+void parse_tlv(const uint8_t *buffer, int numTLVs, int offset, int total_len, radarFrame_t *frame, mmwHeader hdr);
 
 bool find_magic_word(const uint8_t *buffer, int length, int *pos);
 #endif
