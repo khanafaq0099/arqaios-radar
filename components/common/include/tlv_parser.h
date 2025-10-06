@@ -82,11 +82,11 @@ typedef struct
 
 typedef struct __attribute__((packed))
 {
-    mmwHeader header;
-    pointObj points[MAX_POINTS];
-    pointUnit units;
-    int numPoints;
-    listTlv objects[MAX_OBJECTS];
+    mmwHeader header;            // 32 bytes
+    pointObj points[MAX_POINTS]; // 800 bytes
+    pointUnit units;             // 20 bytes
+    int numPoints;               // 4 bytes
+    listTlv objects[MAX_OBJECTS]; 
     int numObjects;
     indexTlv indices[MAX_POINTS];
     int numIndices;

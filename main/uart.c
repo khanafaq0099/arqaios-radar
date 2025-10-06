@@ -111,7 +111,7 @@ static void uart1_reader_task(void *arg)
                                    ((uint32_t)frame_buf[magic_idx + 14] << 16) |
                                    ((uint32_t)frame_buf[magic_idx + 15] << 24);
 
-                // printf("Found packet at magic_idx %d, length %ld\n", magic_idx, pkt_len);
+                printf("Found packet at magic_idx %d, length %ld\n", magic_idx, pkt_len);
 
                 // Wait until we have the full packet
                 if (frame_buf_len - magic_idx < pkt_len)
