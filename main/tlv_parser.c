@@ -52,7 +52,7 @@ void parse_tlv(const uint8_t *buffer, int numTLVs, int offset, int total_len, ra
 
     printf("header data ----- > %ld \n", hdr.numTLVs);
     // offset =  0 , total_len = tlv_len (total_pkt_len - HDR)
-    printf("PARSER: Parsing %d TLVs with offset %d and total length %d\n", numTLVs, offset, total_len);
+    // printf("PARSER: Parsing %d TLVs with offset %d and total length %d\n", numTLVs, offset, total_len);
 
     for (int i = 0; i < numTLVs; i++)
     {
@@ -73,7 +73,7 @@ void parse_tlv(const uint8_t *buffer, int numTLVs, int offset, int total_len, ra
         }
 
         const uint8_t *payload = &buffer[offset];
-        ESP_LOGI("PARSER", "TLV %d: type=%ld, length=%ld", i, type, length);
+        // ESP_LOGI("PARSER", "TLV %d: type=%ld, length=%ld", i, type, length);
 
         switch (type)
         {
@@ -91,9 +91,9 @@ void parse_tlv(const uint8_t *buffer, int numTLVs, int offset, int total_len, ra
             frame->units.rangeUnit = parse_float_le(&payload[12]);
             frame->units.snrUnit = parse_float_le(&payload[16]);
 
-            printf("[DEBUG] Units: elev=%.6f, azim=%.6f, doppler=%.6f, range=%.6f, snr=%.6f\n",
-                   frame->units.elevationUnit, frame->units.azimuthUnit,
-                   frame->units.dopplerUnit, frame->units.rangeUnit, frame->units.snrUnit);
+            // printf("[DEBUG] Units: elev=%.6f, azim=%.6f, doppler=%.6f, range=%.6f, snr=%.6f\n",
+            //        frame->units.elevationUnit, frame->units.azimuthUnit,
+            //        frame->units.dopplerUnit, frame->units.rangeUnit, frame->units.snrUnit);
 
             const uint8_t *point_data = payload + 20;
             int point_payload_len = length - 20;
@@ -101,12 +101,12 @@ void parse_tlv(const uint8_t *buffer, int numTLVs, int offset, int total_len, ra
 
             if (numPoints > MAX_POINTS)
             {
-                printf("[WARNING] Truncating %d points to %d\n", numPoints, MAX_POINTS);
+                // printf("[WARNING] Truncating %d points to %d\n", numPoints, MAX_POINTS);
                 numPoints = MAX_POINTS;
             }
 
             frame->numPoints = numPoints;
-            ESP_LOGI("PARSER", "  numPoints = %d", numPoints);
+            // ESP_LOGI("PARSER", "  numPoints = %d", numPoints);
 
             for (int p = 0; p < numPoints; p++)
             {
@@ -117,7 +117,7 @@ void parse_tlv(const uint8_t *buffer, int numTLVs, int offset, int total_len, ra
                 frame->points[p].range = parse_int16_le(&pt_data[4]);
                 frame->points[p].snr = parse_int16_le(&pt_data[6]);
 
-                printf("[INFO] Parsed %d compressed points from TLV 1020\n", numPoints);
+                // printf("[INFO] Parsed %d compressed points from TLV 1020\n", numPoints);
                 if ((p % 20) == 0)
                     vTaskDelay(pdMS_TO_TICKS(1));
             }
@@ -185,8 +185,8 @@ void parse_tlv(const uint8_t *buffer, int numTLVs, int offset, int total_len, ra
 
     if (frame->numPoints > 0)
     {
-        printf("\n--- Point Cloud Data (first 5 points) ---\n");
-        for (int i = 0; i < frame->numPoints && i < 5; i++)
+        printf("\n--- Point Cloud Data (first 3 points) ---\n");
+        for (int i = 0; i < frame->numPoints && i < 3; i++)
         {
             float elevation = frame->points[i].elevation * frame->units.elevationUnit;
             float azimuth = frame->points[i].azimuth * frame->units.azimuthUnit;
@@ -214,7 +214,7 @@ void parse_tlv(const uint8_t *buffer, int numTLVs, int offset, int total_len, ra
     memcpy(&frame->header, &hdr, sizeof(mmwHeader));
     // Call mqtt operation.
     // ESP_LOG_BUFFER_HEX("before PUBLISH", frame, sizeof(radarFrame_t));
-    Publish((char *)frame, MQTT_TOPIC);
+    // Publish((char *)frame, MQTT_TOPIC);
 }
 
 bool find_magic_word(const uint8_t *buffer, int length, int *pos)

@@ -4,6 +4,7 @@ void app_main(void)
 {
     Wifi_Init();
     uart_init();
+    tx_task();
     uart_read_init();
     parser_init();
 }
