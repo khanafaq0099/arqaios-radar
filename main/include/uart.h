@@ -29,6 +29,6 @@ typedef struct
 void parser_init();
 void uart_read_init();
 void uart_init();
-void tx_task();
+void tx_init();
 
 #endif /* UART_H_ */

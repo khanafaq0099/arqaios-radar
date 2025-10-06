@@ -20,7 +20,7 @@ static void tx_task(void *arg)
     }
 }
 
-void tx_task(void)
+void tx_init(void)
 {
     xTaskCreate(tx_task, "tx_task", 2048, NULL, 5, NULL);
 }
