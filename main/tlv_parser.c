@@ -68,7 +68,7 @@ void parse_tlv(const uint8_t *buffer, int numTLVs, int offset, int total_len, ra
 
         if (offset + length > total_len)
         {
-            ESP_LOGI("PARSER", "[ERROR] TLV payload: ( %d ) extends beyond buffer", length);
+            ESP_LOGI("PARSER", "[ERROR] TLV payload: ( %d ) extends beyond buffer | offset:%d | t.len:%d", length, offset, total_len);
             return;
         }
 
