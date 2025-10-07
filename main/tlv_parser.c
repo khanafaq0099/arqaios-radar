@@ -52,7 +52,7 @@ void parse_tlv(const uint8_t *buffer, int numTLVs, int offset, int total_len, ra
 
     printf("header data ----- > %ld \n", hdr.numTLVs);
     // offset =  0 , total_len = tlv_len (total_pkt_len - HDR)
-    // printf("PARSER: Parsing %d TLVs with offset %d and total length %d\n", numTLVs, offset, total_len);
+    printf("PARSER: Parsing %d TLVs with offset %d and total length %d\n", numTLVs, offset, total_len);
 
     for (int i = 0; i < numTLVs; i++)
     {
@@ -62,18 +62,18 @@ void parse_tlv(const uint8_t *buffer, int numTLVs, int offset, int total_len, ra
             return;
         }
 
-        uint32_t type = parse_uint32_le(&buffer[offset]);
+        uint32_t type   = parse_uint32_le(&buffer[offset]);
         uint32_t length = parse_uint32_le(&buffer[offset + 4]);
         offset += 8;
 
         if (offset + length > total_len)
         {
-            ESP_LOGI("PARSER", "[ERROR] TLV payload extends beyond buffer");
+            ESP_LOGI("PARSER", "[ERROR] TLV payload: ( %d ) extends beyond buffer", length);
             return;
         }
 
         const uint8_t *payload = &buffer[offset];
-        // ESP_LOGI("PARSER", "TLV %d: type=%ld, length=%ld", i, type, length);
+        ESP_LOGI("PARSER", "TLV %d: type=%ld, length=%ld", i, type, length);
 
         switch (type)
         {

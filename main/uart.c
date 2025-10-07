@@ -56,8 +56,10 @@ static void uart_reader_task(void *arg)
                     break;
 
                 radarFrame_t radar_frame;
+                mmwHeader hdr;
+                memcpy(&hdr, &radar_frame.header, sizeof(mmwHeader));
                 ptr = frame_buf + magic_idx + 8; // Skip magic word
-                parse_header(ptr, &radar_frame.header);
+                parse_header(ptr, &hdr);
                 ptr = NULL;
 
                 frame_t frame;
@@ -155,8 +157,10 @@ static void parser_task(void *arg)
         {
             ESP_LOGI(TAG, "UART1 Parser got frame len=%d", frame.pkt_len);
             numTLVs = frame.header.numTLVs;
+            offset = 0;
             radarFrame_t radar_frame = {0};
             parse_tlv(frame.tlv_data, numTLVs, offset, frame.pkt_len, &radar_frame, frame.header);
+            memset(&frame, 0, sizeof(frame_t));
         }
         vTaskDelay(pdMS_TO_TICKS(50));
     }
